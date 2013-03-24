@@ -62,15 +62,15 @@ class BiscuitJoint
 		$keys[1][] = empty($options['parts'][1]) ? new stdClass() : $options['parts'][1];
 
 		$query_params = array(
-            'query'=>array(
-                'startkey'=>json_encode($keys[0]),
+			'query'=>array(
+				'startkey'=>json_encode($keys[0]),
 				'endkey'=>json_encode($keys[1])
-            ),
+			),
 			'debug'=>true,
-            'opts'=>array(
-                'filter'=>$override_filter ?: 'docstate_only',
-                'blacklist'=>array('__phreezer_hash')
-            )
+			'opts'=>array(
+				'filter'=>$override_filter ?: 'docstate_only',
+				'blacklist'=>array('__phreezer_hash')
+			)
 		);
 
 		if($override_filter == 'thaw'){

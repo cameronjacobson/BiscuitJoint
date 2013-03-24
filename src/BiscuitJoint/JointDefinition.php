@@ -4,10 +4,10 @@ namespace BiscuitJoint;
 
 class JointDefinition
 {
-    const symmetric = true;
-    const asymmetric = false;
+	const symmetric = true;
+	const asymmetric = false;
 
-    private $symmetric = self::symmetric;
+	private $symmetric = self::symmetric;
 
 	public $partA;
 	public $partB;
