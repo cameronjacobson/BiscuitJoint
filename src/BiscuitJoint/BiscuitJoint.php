@@ -64,7 +64,8 @@ class BiscuitJoint
 		$query_params = array(
 			'query'=>array(
 				'startkey'=>json_encode($keys[0]),
-				'endkey'=>json_encode($keys[1])
+				'endkey'=>json_encode($keys[1]),
+				'include_docs'=>'true'
 			),
 			'debug'=>true,
 			'opts'=>array(
