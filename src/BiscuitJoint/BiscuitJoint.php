@@ -20,6 +20,7 @@ class BiscuitJoint
 	}
 
 	public static function deleteJoints(Array $options){
+
 		$phreezer = new Phreezer();
 		$results = self::getJoints($options, 'thaw');
 		foreach($results as $uuid=>$obj){
@@ -65,9 +66,9 @@ class BiscuitJoint
 			'query'=>array(
 				'startkey'=>json_encode($keys[0]),
 				'endkey'=>json_encode($keys[1]),
-				'include_docs'=>'true'
+				'include_docs'=>'true',
+				'inclusive_end'=>'true'
 			),
-			'debug'=>true,
 			'opts'=>array(
 				'filter'=>$override_filter ?: 'docstate_only',
 				'blacklist'=>array('__phreezer_hash')
@@ -79,6 +80,32 @@ class BiscuitJoint
 			$query_params['include_docs'] = 'true';
 		}
 
-		return self::$couch->_view->query('all_joints',$query_params);
+		if(!empty($options['whitelist'])){
+			$query_params['opts']['whitelist'] = $options['whitelist'];
+			$query_params['opts']['filter'] = 'docstate_only';
+			unset($query_params['opts']['blacklist']);
+		}
+
+		$result = self::$couch->_view->query('all_joints',$query_params);
+
+		if(!empty($options['missing_part'])){
+			// TODO:  Turn this into callback that is passed into $couch->_view service
+			$return = array();
+			foreach($result['rows'] as $value){
+				$return[] = $value['partA'] === $options['parts'][0] ? $value['partB'] : $value['partA'];
+			}
+			return $return;
+		}
+
+		if(!empty($options['partb'])){
+			// TODO:  Turn this into callback that is passed into $couch->_view service
+			$return = array();
+			foreach($result['rows'] as $value){
+				$return[] = $value['partB'];
+			}
+			return $return;
+		}
+
+		return $result;
 	}
 }
