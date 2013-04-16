@@ -40,6 +40,7 @@ class BiscuitJoint
 		$joint->partA = array_shift($options['parts']);
 		$joint->partB = array_shift($options['parts']);
 		$joint->type = $options['type'];
+		$joint->names = $options['names'];
 		if(isset($options['symmetric'])){
 			$joint->setSymmetry($options['symmetric']);
 		}
@@ -49,6 +50,108 @@ class BiscuitJoint
 	public static function isDuplicate(Array $options){
 		$joints = self::getJoints($options,'id_only');
 		return count($joints['rows']) > 0;
+	}
+
+	public static function getGroupOfJoints(Array $options){
+		$keys = array();
+		foreach($options['keys'] as $key){
+			$keys[] = array($key, $options['type']);
+		}
+		$query_params = array(
+			'query'=>array(
+				'keys'=>json_encode($keys),
+				'include_docs'=>'true'
+			),
+			'opts'=>array(
+				'filter'=>@$override_filter ?: 'docstate_only',
+				'blacklist'=>array('__phreezer_hash')
+			)
+		);
+
+		if($override_filter == 'thaw'){
+			$query_params['opts'] = array('thaw'=>true);
+			$query_params['include_docs'] = 'true';
+		}
+
+		if(!empty($options['whitelist'])){
+			$query_params['opts']['whitelist'] = $options['whitelist'];
+			$query_params['opts']['filter'] = 'docstate_only';
+			unset($query_params['opts']['blacklist']);
+		}
+
+		$result = self::$couch->_view->query('group_joints',$query_params);
+
+		if(!empty($options['missing_part'])){
+			// TODO:  Turn this into callback that is passed into $couch->_view service
+			$return = array();
+			foreach($result['rows'] as $value){
+				$return[] = $value['partA'] === $options['parts'][0] ? $value['partB'] : $value['partA'];
+			}
+			return $return;
+		}
+
+		if(!empty($options['partb'])){
+			// TODO:  Turn this into callback that is passed into $couch->_view service
+			$return = array();
+			foreach($result['rows'] as $value){
+				$return[] = $value['partB'];
+			}
+			return $return;
+		}
+
+		return $result;
+	}
+
+	public static function getGroupsOfJoints(Array $options){
+		$keys = array();
+		foreach($options['types'] as $type){
+			foreach($options['keys'] as $key){
+				$keys[] = array($key, $type);
+			}
+		}
+		$query_params = array(
+			'query'=>array(
+				'keys'=>json_encode($keys),
+				'include_docs'=>'true'
+			),
+			'opts'=>array(
+				'filter'=>@$override_filter ?: 'docstate_only',
+				'blacklist'=>array('__phreezer_hash')
+			)
+		);
+
+		if($override_filter == 'thaw'){
+			$query_params['opts'] = array('thaw'=>true);
+			$query_params['include_docs'] = 'true';
+		}
+
+		if(!empty($options['whitelist'])){
+			$query_params['opts']['whitelist'] = $options['whitelist'];
+			$query_params['opts']['filter'] = 'docstate_only';
+			unset($query_params['opts']['blacklist']);
+		}
+
+		$result = self::$couch->_view->query('group_joints',$query_params);
+
+		if(!empty($options['missing_part'])){
+			// TODO:  Turn this into callback that is passed into $couch->_view service
+			$return = array();
+			foreach($result['rows'] as $value){
+				$return[] = $value['partA'] === $options['parts'][0] ? $value['partB'] : $value['partA'];
+			}
+			return $return;
+		}
+
+		if(!empty($options['partb'])){
+			// TODO:  Turn this into callback that is passed into $couch->_view service
+			$return = array();
+			foreach($result['rows'] as $value){
+				$return[] = $value['partB'];
+			}
+			return $return;
+		}
+
+		return $result;
 	}
 
 	public static function getJoints(Array $options, $override_filter = null){

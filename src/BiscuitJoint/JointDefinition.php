@@ -12,6 +12,7 @@ class JointDefinition
 	public $partA;
 	public $partB;
 	public $type;
+	public $names;
 
 	public function __construct(){
 		
